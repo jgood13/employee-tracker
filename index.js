@@ -1,6 +1,7 @@
 const inquirer = require('inquirer')
 const connection = require('./config/connection')
 const mysql = require('mysql2')
+const logo = require('asciiart-logo')
 
 const mainMenu = () =>{
 
@@ -42,7 +43,7 @@ const mainMenu = () =>{
             updateEmp();
             break;
         case 'Exit':
-            connection.end();
+            quit();
             break;
       }
   })
@@ -51,9 +52,39 @@ const mainMenu = () =>{
   })
 };
 
-const viewDepts = () => {
-  connection.query(`SELECT * FROM DEPARTMENT`)
+const quit = () =>{
+  console.log('Thanks for stopping by.')
+  process.exit()
 }
 
+const viewDepts = () => {
+  connection.query(`SELECT * FROM DEPARTMENT`, (err, res) => {
+    if (err) {
+      console.error(err)
+    }
+    console.table(res)
+    mainMenu()
+  })
+}
 
+const viewRoles = () =>{
+  connection.query(`SELECT * FROM ROLES`, (err, res) =>{
+    if (err) {
+      console.error(err)
+    }
+    console.table(res)
+    mainMenu()
+  })
+}
+
+// const viewEmps = () => {
+//   connection.query(`SELECT * FROM EMPLOYEES`, (err, res) =>{
+//     if (err) {
+//       console.error(err)
+//     }
+//     console.table(res)
+//   })
+// }
+
+console.log(logo({name: 'Employee Tracker'}).render())
 mainMenu();
