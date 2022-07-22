@@ -1,10 +1,11 @@
+// Requiring dependancies
 const inquirer = require('inquirer')
 const connection = require('./config/connection')
 const mysql = require('mysql2')
 const logo = require('asciiart-logo')
 
+// Function that calls the primary inquirer prompt screen
 const mainMenu = () =>{
-
   inquirer.prompt({
       message: "Choose what you would like to do.",
       type: 'list',
@@ -51,11 +52,13 @@ const mainMenu = () =>{
   })
 };
 
+// function for selecting exit from primary prompt
 const quit = () =>{
   console.log('Thanks for stopping by.')
   process.exit()
 }
 
+// function for viewing all departments
 const viewDepts = () => {
   connection.query(`SELECT * FROM DEPARTMENT`, (err, res) => {
     if (err) {
@@ -66,6 +69,7 @@ const viewDepts = () => {
   })
 }
 
+// function for viewing all roles
 const viewRoles = () =>{
   connection.query(`SELECT roles.title, roles.id, roles.salary, department.name AS department
                     FROM roles
@@ -78,6 +82,7 @@ const viewRoles = () =>{
   })
 }
 
+// function for viewing specific attributes about each employee
 const viewEmps = () => {
   connection.query(
     `SELECT employee.id, employee.first_name,
@@ -96,6 +101,7 @@ const viewEmps = () => {
   })
 }
 
+// function for adding a department
 const addDept = () => {
   inquirer.prompt({
     name: 'departmentName',
@@ -120,6 +126,7 @@ const addDept = () => {
   })
 }
 
+// Function for adding a role
 const addRole = () =>{
   connection.query(`SELECT name, id FROM department`, (err, res) => {
     if (err){
@@ -162,6 +169,7 @@ const addRole = () =>{
   })
 }
 
+// function for adding an employee
 const addEmp = () => {
   inquirer.prompt([
     {
@@ -198,6 +206,7 @@ const addEmp = () => {
             type:'list',
             choices: ()=>{
               let managers = res.map(({first_name, last_name, id}) => ({ name:(first_name + ' '+ last_name), value: id}))
+              // adding option of null in case new employee is manager
               managers.push([null])
               return managers
             }
@@ -222,6 +231,7 @@ const addEmp = () => {
   })
 };
 
+// function for updating employee role
 const updateEmp = () =>{
   connection.query(`SELECT first_name, last_name, id FROM employee`, (err, res) =>{
     if (err){
@@ -267,6 +277,6 @@ const updateEmp = () =>{
     })
 })
 }
-
+// creating inital logo
 console.log(logo({name: 'Employee Tracker'}).render())
 mainMenu();
