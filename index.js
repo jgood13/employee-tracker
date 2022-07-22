@@ -17,8 +17,7 @@ const mainMenu = () =>{
         'Add an employee',
         'Update an employee',
         'Exit',]
-  },
-  )
+  })
   .then(answer => {
     switch (answer.userPrompt) {
         case 'View all departments':
@@ -211,13 +210,63 @@ const addEmp = () => {
             })
             console.log('Employee added!')
             mainMenu()
-          })
+          })   
+          .catch(err =>{
+            if (err){
+              console.error(err)
+            }
+          }) 
       })
-      
       })
     })
   })
 };
+
+const updateEmp = () =>{
+  connection.query(`SELECT first_name, last_name, id FROM employee`, (err, res) =>{
+    if (err){
+      console.error(err)
+    }
+    inquirer.prompt([{
+      name: 'updateEmployee',
+      type: 'list',
+      choices: () =>{
+        let employeeList = res.map(({first_name,last_name,id}) =>({name:(first_name + ' '+ last_name), value: id }))
+        return employeeList
+      }
+    }])
+    .then(response=>{
+      connection.query(`SELECT title, id FROM roles`, (err, res) =>{
+        if (err){
+          console.error(err)
+        }
+        inquirer.prompt([{
+          name: 'updateRole',
+          type: 'list',
+          choices: () =>{
+            let rolesList = res.map(({title, id}) => ({name:title,value:id}))
+            console.log(rolesList)
+            return rolesList
+          }
+        }])
+        .then(response2 =>{
+          connection.query(`UPDATE employee SET roles_id = '${response2.updateRole}' WHERE id = ${response.updateEmployee} `, (err,res) =>{
+            if (err){
+              console.log(err)
+            }
+            console.log('Your employee role has been updated')
+            mainMenu()
+          })
+        })
+        .catch(err=>{
+          if (err){
+            console.error(err)
+          }
+        })
+      })
+    })
+})
+}
 
 console.log(logo({name: 'Employee Tracker'}).render())
 mainMenu();
