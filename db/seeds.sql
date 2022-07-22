@@ -19,4 +19,6 @@ VALUES ('Dennis', 'Reynolds', 3, NULL),
        ('Frank', 'Reynolds', 7, NULL),
        ('Dee', 'Reynolds', 2, 1),
        ('Charlie', 'Kelly', 6, 2),
-       ('The', 'Waitress', 4, 1)
+       ('The', 'Waitress', 4, 1),
+       ('Rickety', 'Cricket', 5, NULL),
+       ('Ben', 'theSoldier', 1, 2);

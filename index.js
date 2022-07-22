@@ -1,7 +1,6 @@
 // Requiring dependancies
 const inquirer = require('inquirer')
 const connection = require('./config/connection')
-const mysql = require('mysql2')
 const logo = require('asciiart-logo')
 
 // Function that calls the primary inquirer prompt screen
@@ -16,7 +15,9 @@ const mainMenu = () =>{
         'Add a department',
         'Add a role',
         'Add an employee',
-        'Update an employee',
+        'Update an employee role',
+        'Update an employee manager',
+        'Delete departments, roles, or employees',
         'Exit',]
   })
   .then(answer => {
@@ -36,12 +37,18 @@ const mainMenu = () =>{
         case 'Add a role':
             addRole();
             break;
-        case 'Add an employee':
+        case 'Add an employee role':
             addEmp();
             break;
-        case 'Update an employee':
+        case 'Update an employee role':
             updateEmp();
             break;
+        case 'Update an employee manager':
+            updateMan()
+            break;
+        case 'Delete departments, roles, or employees':
+             deleteStuff()
+             break;
         case 'Exit':
             quit();
             break;
@@ -277,6 +284,151 @@ const updateEmp = () =>{
     })
 })
 }
+
+const updateMan = () =>{
+  connection.query(`SELECT first_name, last_name, id FROM employee`, (err, res) =>{
+    if (err){
+      console.error(err)
+    }
+    inquirer.prompt([{
+      name: 'updateEmployee',
+      type: 'list',
+      choices: () =>{
+        let employeeList = res.map(({first_name,last_name,id}) =>({name:(first_name + ' '+ last_name), value: id }))
+        return employeeList
+      }
+    }])
+    .then(response=>{
+      connection.query(`SELECT first_name, last_name, id FROM employee`, (err, res) =>{
+        if (err){
+          console.error(err)
+        }
+        inquirer.prompt([{
+          name: 'updateMan',
+          type: 'list',
+          choices: () =>{
+            let managerList = res.map(({first_name, last_name, id}) => ({name:(first_name+ ' ' + last_name),value:id}))
+            managerList.push([null])
+            return managerList
+          }
+        }])
+        .then(response2 =>{
+          console.log(response2.updateMan)
+          connection.query(`UPDATE employee SET manager_id = '${response2.updateMan}' WHERE id = ${response.updateEmployee} `, (err,res) =>{
+            if (err){
+              console.log(err)
+            }
+            console.log('Your employee manager has been updated')
+            mainMenu()
+          })
+        })
+        .catch(err=>{
+          if (err){
+            console.error(err)
+          }
+        })
+      })
+    })
+})
+}
+
+const deleteStuff = () =>{
+  inquirer.prompt([{
+    name: 'delete',
+    type: 'list',
+    choices: ['departments',
+             'roles',
+             'employees']
+  }])
+  .then(answer => {
+    switch (answer.delete) {
+        case 'departments':
+            deleteDepts();
+            break;
+        case 'roles':
+            deleteRoles();
+            break;
+        case 'employees':
+            deleteEmps();
+            break;
+          }
+  })
+  const deleteDepts = () =>{
+    connection.query(`SELECT name, id FROM department`,(err, res)=>{
+      if (err) {
+        console.log(err)
+      }
+      inquirer.prompt([{
+        name: 'deleteDept',
+        type: 'list',
+        choices: () =>{
+          let depts = res.map(({name, id}) =>({name:name, value:id}))
+          return depts
+        }
+      }])
+      .then(response=>{
+        connection.query(`Delete FROM department WHERE id = ${response.deleteDept}`, (err, res) =>{
+          if (err) {
+            console.error(err)
+          }
+          console.log('Your department has been deleted!')
+          mainMenu()
+        })
+      })
+    })
+  }
+
+  const deleteRoles = () =>{
+    connection.query(`SELECT title, id FROM roles`,(err, res)=>{
+      if (err) {
+        console.log(err)
+      }
+      inquirer.prompt([{
+        name: 'deleteRole',
+        type: 'list',
+        choices: () =>{
+          let roles = res.map(({title, id}) =>({name:title, value:id}))
+          return roles
+        }
+      }])
+      .then(response=>{
+        connection.query(`Delete FROM roles WHERE id = ${response.deleteRole}`, (err, res) =>{
+          if (err) {
+            console.error(err)
+          }
+          console.log('Your role has been deleted!')
+          mainMenu()
+        })
+      })
+    })
+  }
+
+  const deleteEmps = () =>{
+    connection.query(`SELECT first_name,last_name, id FROM employee`,(err, res)=>{
+      if (err) {
+        console.log(err)
+      }
+      inquirer.prompt([{
+        name: 'deleteEmployee',
+        type: 'list',
+        choices: () =>{
+          let employees = res.map(({first_name, last_name, id}) =>({name:(first_name+' '+last_name), value:id}))
+          return employees
+        }
+      }])
+      .then(response=>{
+        connection.query(`Delete FROM employee WHERE id = ${response.deleteEmployee}`, (err, res) =>{
+          if (err) {
+            console.error(err)
+          }
+          console.log('Your employee has been deleted!')
+          mainMenu()
+        })
+      })
+    })
+  }
+}
+
 // creating inital logo
 console.log(logo({name: 'Employee Tracker'}).render())
 mainMenu();
