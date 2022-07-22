@@ -68,7 +68,7 @@ const viewDepts = () => {
 }
 
 const viewRoles = () =>{
-  connection.query(`SELECT roles.title, roles.id, roles.salary,department.name AS department
+  connection.query(`SELECT roles.title, roles.id, roles.salary, department.name AS department
                     FROM roles
                     INNER JOIN department ON roles.department_id = department.id`, (err, res) =>{
     if (err) {
@@ -85,10 +85,10 @@ const viewEmps = () => {
             employee.last_name, roles.title,
             department.name AS department, roles.salary,
             CONCAT (manager.first_name,' ', manager.last_name) AS manager
-    FROM employee
-            INNER JOIN employee manager ON employee.manager_id = manager.id
-            INNER JOIN roles on employee.roles_id = roles.id
-            LEFT JOIN department on roles.department_id = department.id`, (err, res) =>{
+            FROM employee
+            LEFT JOIN employee manager ON employee.manager_id = manager.id
+            LEFT JOIN roles on employee.roles_id = roles.id
+            INNER JOIN department on roles.department_id = department.id`, (err, res) =>{
     if (err) {
       console.error(err)
     }
@@ -160,11 +160,64 @@ const addRole = () =>{
       console.error(err)
     }
   })
-  
   })
-  
- 
 }
+
+const addEmp = () => {
+  inquirer.prompt([
+    {
+      name: 'firstName',
+      type: 'input',
+      message: 'What is the first name of the employee?'
+    },
+    {
+      name: 'lastName',
+      type: 'input',
+      message: 'What is the last name of the employee?'
+    }
+  ])
+  .then(response => {
+    let empInfo = [response.firstName, response.lastName]
+    connection.query(`SELECT title, id FROM roles`, (err, res) =>{
+      if (err){
+        console.error(err)}
+        inquirer.prompt([{
+        name: 'role',
+        type: 'list',
+        choices: () =>{
+          let roleArray = res.map(({title, id}) => ({name:title, value:id}))
+          return roleArray
+        }
+      }])
+      .then(response =>{
+        empInfo.push(response.role)
+        connection.query(`SELECT first_name, last_name, id FROM employee`,(err,res)=>{
+          if (err){
+            console.log(err)}
+          inquirer.prompt([{
+            name:'manager',
+            type:'list',
+            choices: ()=>{
+              let managers = res.map(({first_name, last_name, id}) => ({ name:(first_name + ' '+ last_name), value: id}))
+              managers.push([null])
+              return managers
+            }
+          }])
+          .then(response =>{
+            empInfo.push(response.manager)
+            connection.query(`INSERT INTO employee (first_name,last_name,roles_id,manager_id) VALUES (?,?,?,?)`, empInfo, (err, res) =>{
+              if (err)
+              console.error(err)
+            })
+            console.log('Employee added!')
+            mainMenu()
+          })
+      })
+      
+      })
+    })
+  })
+};
 
 console.log(logo({name: 'Employee Tracker'}).render())
 mainMenu();
