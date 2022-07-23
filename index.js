@@ -306,7 +306,6 @@ const updateMan = () =>{
           type: 'list',
           choices: () =>{
             let managerList = res.map(({first_name, last_name, id}) => ({name:(first_name+ ' ' + last_name),value:id}))
-            managerList.push([null])
             return managerList
           }
         }])
@@ -374,6 +373,7 @@ const deleteStuff = () =>{
           mainMenu()
         })
       })
+      
     })
   }
 
@@ -425,6 +425,11 @@ const deleteStuff = () =>{
           console.log('Your employee has been deleted!')
           mainMenu()
         })
+      })
+      .catch(err=>{
+        if (err){
+          console.error(err)
+        }
       })
     })
   }
