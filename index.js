@@ -115,9 +115,6 @@ const addDept = () => {
     type: 'input',
     message: 'Input department name'
   }).then(response => {
-    if (!response.departmentName ||response.departmentName == null || response.departmentName == ''){
-      console.log('You have to input a department name.')
-    }
     connection.query(`INSERT INTO department (name) VALUES (?)`, [response.departmentName], (err, res) =>{
     if (err) {
       console.error(err)
