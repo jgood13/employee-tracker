@@ -37,8 +37,8 @@ const mainMenu = () =>{
         case 'Add a role':
             addRole();
             break;
-        case 'Add an employee role':
-            addEmp();
+        case 'Add an employee':
+            addEmp()
             break;
         case 'Update an employee role':
             updateEmp();
@@ -47,8 +47,8 @@ const mainMenu = () =>{
             updateMan()
             break;
         case 'Delete departments, roles, or employees':
-             deleteStuff()
-             break;
+            deleteStuff()
+            break;
         case 'Exit':
             quit();
             break;
@@ -177,7 +177,9 @@ const addRole = () =>{
 }
 
 // function for adding an employee
+
 const addEmp = () => {
+  console.log('running addEMP')
   inquirer.prompt([
     {
       name: 'firstName',
@@ -262,14 +264,13 @@ const updateEmp = () =>{
           type: 'list',
           choices: () =>{
             let rolesList = res.map(({title, id}) => ({name:title,value:id}))
-            console.log(rolesList)
             return rolesList
           }
         }])
         .then(response2 =>{
           connection.query(`UPDATE employee SET roles_id = '${response2.updateRole}' WHERE id = ${response.updateEmployee} `, (err,res) =>{
             if (err){
-              console.log(err)
+              console.error(err)
             }
             console.log('Your employee role has been updated')
             mainMenu()
@@ -364,7 +365,8 @@ const deleteStuff = () =>{
         choices: () =>{
           let depts = res.map(({name, id}) =>({name:name, value:id}))
           return depts
-        }
+        },
+        message: 'Choose a department to delete!'
       }])
       .then(response=>{
         connection.query(`Delete FROM department WHERE id = ${response.deleteDept}`, (err, res) =>{
@@ -389,7 +391,8 @@ const deleteStuff = () =>{
         choices: () =>{
           let roles = res.map(({title, id}) =>({name:title, value:id}))
           return roles
-        }
+        },
+        message: 'Choose a role to delete!'
       }])
       .then(response=>{
         connection.query(`Delete FROM roles WHERE id = ${response.deleteRole}`, (err, res) =>{
@@ -414,7 +417,8 @@ const deleteStuff = () =>{
         choices: () =>{
           let employees = res.map(({first_name, last_name, id}) =>({name:(first_name+' '+last_name), value:id}))
           return employees
-        }
+        },
+        message: 'Choose an employee to delete!'
       }])
       .then(response=>{
         connection.query(`Delete FROM employee WHERE id = ${response.deleteEmployee}`, (err, res) =>{
@@ -428,6 +432,7 @@ const deleteStuff = () =>{
     })
   }
 }
+
 
 // creating inital logo
 console.log(logo({name: 'Employee Tracker'}).render())
