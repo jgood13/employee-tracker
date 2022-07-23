@@ -152,7 +152,8 @@ const addRole = () =>{
       choices: () =>{
         let resArray = res.map(({name,id})=> ({name: name, value: id}))
         return resArray
-      }
+      },
+      message: 'What department is it in?'
       }
     ])
     .then(response =>{
@@ -200,7 +201,8 @@ const addEmp = () => {
         choices: () =>{
           let roleArray = res.map(({title, id}) => ({name:title, value:id}))
           return roleArray
-        }
+        },
+        message: 'What is their role?'
       }])
       .then(response =>{
         empInfo.push(response.role)
@@ -215,7 +217,8 @@ const addEmp = () => {
               // adding option of null in case new employee is manager
               managers.push([null])
               return managers
-            }
+            },
+            message: 'Who is their manager?'
           }])
           .then(response =>{
             empInfo.push(response.manager)
@@ -249,7 +252,8 @@ const updateEmp = () =>{
       choices: () =>{
         let employeeList = res.map(({first_name,last_name,id}) =>({name:(first_name + ' '+ last_name), value: id }))
         return employeeList
-      }
+      },
+      message: 'Which employees role would you like to change?'
     }])
     .then(response=>{
       connection.query(`SELECT title, id FROM roles`, (err, res) =>{
@@ -262,7 +266,8 @@ const updateEmp = () =>{
           choices: () =>{
             let rolesList = res.map(({title, id}) => ({name:title,value:id}))
             return rolesList
-          }
+          },
+          message: 'hat is their new role?'
         }])
         .then(response2 =>{
           connection.query(`UPDATE employee SET roles_id = '${response2.updateRole}' WHERE id = ${response.updateEmployee} `, (err,res) =>{
@@ -294,7 +299,8 @@ const updateMan = () =>{
       choices: () =>{
         let employeeList = res.map(({first_name,last_name,id}) =>({name:(first_name + ' '+ last_name), value: id }))
         return employeeList
-      }
+      },
+      message: 'Whos manager would you like to change?'
     }])
     .then(response=>{
       connection.query(`SELECT first_name, last_name, id FROM employee`, (err, res) =>{
@@ -307,7 +313,8 @@ const updateMan = () =>{
           choices: () =>{
             let managerList = res.map(({first_name, last_name, id}) => ({name:(first_name+ ' ' + last_name),value:id}))
             return managerList
-          }
+          },
+          message: 'Which person would you like to choose as a new manager?'
         }])
         .then(response2 =>{
           console.log(response2.updateMan)
@@ -335,7 +342,8 @@ const deleteStuff = () =>{
     type: 'list',
     choices: ['departments',
              'roles',
-             'employees']
+             'employees'],
+    message: 'What section would you like to delete from?'
   }])
   .then(answer => {
     switch (answer.delete) {
